@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Grupo Milla — Acceso Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F7F7F7;font-family:'Outfit',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#fff;border-radius:16px;padding:48px 40px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,.12);text-align:center}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:#1A1A1A;margin-bottom:4px}
+.logo span{color:#C0392B}
+.sub{font-size:11px;color:#A0A0A0;text-transform:uppercase;letter-spacing:2px;margin-bottom:36px}
+.label{font-size:12px;color:#707070;font-weight:500;text-align:left;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.pin-input{width:100%;padding:14px 16px;font-size:22px;letter-spacing:8px;border:2px solid #E8E8E8;border-radius:10px;text-align:center;font-family:'Outfit',sans-serif;font-weight:600;color:#1A1A1A;outline:none;transition:border-color .2s}
+.pin-input:focus{border-color:#C0392B}
+.btn{width:100%;padding:14px;background:#C0392B;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:20px;transition:background .2s;letter-spacing:1px;text-transform:uppercase}
+.btn:hover{background:#922B21}
+.error{color:#C0392B;font-size:13px;margin-top:12px;min-height:20px;font-weight:500}
+.hint{font-size:11px;color:#C0C0C0;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">GRUPO <span>MILLA</span></div>
+  <div class="sub">Dashboard Comercial</div>
+  <div class="label">Ingresá tu PIN</div>
+  <input class="pin-input" type="password" id="pin" maxlength="6" placeholder="······" autocomplete="off" inputmode="numeric">
+  <button class="btn" onclick="ingresar()">Ingresar</button>
+  <div class="error" id="err"></div>
+  <div class="hint">Contactá a administración si no tenés tu PIN</div>
+</div>
+
+<script>
+const PINES = {
+  "100000": { archivo: "dashboard_gerencia.html",                                    nombre: "MAESTRO — Acceso Completo" },
+  "202945": { archivo: "por_sucursal/dashboard_MILLA_MDP_CHAMPAGNAT.html",           nombre: "Milla MDQ Champagnat" },
+  "203056": { archivo: "por_sucursal/dashboard_MILLA_MDP_INDEPENDENCIA.html",        nombre: "Milla MDQ Independencia" },
+  "204167": { archivo: "por_sucursal/dashboard_MILLA_NEUCAR_CASA_CENTRAL.html",      nombre: "Milla Neucar Carhué" },
+  "205278": { archivo: "por_sucursal/dashboard_MILLA_NEUCAR_CARHUE_LOCAL.html",      nombre: "Milla Neucar Carhué Local" },
+  "207490": { archivo: "por_sucursal/dashboard_MILLA_NEUCAR_PEHUAJ.html",            nombre: "Milla Neucar Pehuajó" },
+  "208501": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_AELO.html",             nombre: "Milla NQN Añelo" },
+  "209612": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_BARILOCHE.html",        nombre: "Milla NQN Bariloche" },
+  "210723": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_CIPOLLETTI.html",       nombre: "Milla NQN Cipolletti" },
+  "211834": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_CUTRAL_CO.html",        nombre: "Milla NQN Cutral Có" },
+  "212945": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_NEUQUEN.html",          nombre: "Milla NQN Neuquén" },
+  "213056": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_ROCA.html",             nombre: "Milla NQN Roca" },
+  "214167": { archivo: "por_sucursal/dashboard_MILLA_SUR_BAHIA_BLANCA.html",         nombre: "Milla Sur Bahía Blanca" },
+  "216389": { archivo: "por_sucursal/dashboard_MILLA_SUR_RIO_GALLEGOS.html",         nombre: "Milla Sur Río Gallegos" },
+  "217490": { archivo: "por_sucursal/dashboard_MILLA_SUR_SANTA_ROSA.html",           nombre: "Milla Sur Santa Rosa" },
+  "218501": { archivo: "por_sucursal/dashboard_MILLA_SUR_TRES_ARROYOS.html",         nombre: "Milla Sur Tres Arroyos" },
+  "219612": { archivo: "por_sucursal/dashboard_GOMERIAS_MONZA_TRUCK.html",           nombre: "Gomerías Monza Truck" },
+  "220723": { archivo: "por_sucursal/dashboard_MONZA_NEUMATICOS_BAHIA_BLANCA.html",  nombre: "Monza Neumáticos BB" },
+  "221834": { archivo: "por_sucursal/dashboard_MONZA_NEUMATICOS_BTS_BAHIA_BLANCA.html", nombre: "Monza Neumáticos BTS" },
+  "224167": { archivo: "por_sucursal/dashboard_RECMIL_CARHUE.html",                  nombre: "Recmil Carhué" },
+  "225278": { archivo: "por_sucursal/dashboard_RECMIL_OLAVARRIA.html",               nombre: "Recmil Olavarría" },
+  "226389": { archivo: "por_sucursal/dashboard_RECMIL_REALICO.html",                 nombre: "Recmil Realicó" },
+  "227490": { archivo: "por_sucursal/dashboard_SUR_NEUMATICOS_PUERTO_MADRYN.html",   nombre: "Milla Sur Puerto Madryn" },
+  "228501": { archivo: "por_sucursal/dashboard_SUR_NEUMATICOS_TRELEW.html",          nombre: "Milla Sur Trelew" },
+  "229612": { archivo: "dashboard_recmil.html",                                       nombre: "Recmil Mar del Plata" },
+  "230723": { archivo: "dashboard_recmil.html",                                       nombre: "Recmil Cipolletti" },
+};
+
+const input = document.getElementById('pin');
+const err   = document.getElementById('err');
+
+input.addEventListener('keydown', e => { if(e.key === 'Enter') ingresar(); });
+input.focus();
+
+function ingresar() {
+  const pin = input.value.trim();
+  const acceso = PINES[pin];
+  if (!acceso) {
+    err.textContent = 'PIN incorrecto. Intentá de nuevo.';
+    input.value = '';
+    input.focus();
+    return;
+  }
+  err.textContent = '';
+  window.location.href = acceso.archivo;
+}
+</script>
+</body>
+</html>
