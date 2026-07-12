@@ -78,6 +78,7 @@ function ingresar() {
     return;
   }
   err.textContent = '';
+  sessionStorage.setItem('gm_auth', pin);
   window.location.href = acceso.archivo;
 }
 </script>
