@@ -81,7 +81,9 @@ function ingresar() {
   }
   err.textContent = '';
   sessionStorage.setItem('gm_auth', pin);
-  window.location.href = acceso.archivo;
+  // Se agrega la fecha de hoy a la URL para que el navegador no sirva una versión vieja del caché
+  const v = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  window.location.href = acceso.archivo + '?v=' + v;
 }
 </script>
 </body>
