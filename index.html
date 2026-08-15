@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<!-- Sin esto el navegador sirve la pantalla de acceso vieja y siguen andando
+     los PINs anteriores aunque ya se hayan cambiado -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Grupo Milla — Acceso Dashboard</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap');
@@ -13,7 +18,7 @@ body{background:#F7F7F7;font-family:'Outfit',sans-serif;min-height:100vh;display
 .logo span{color:#C0392B}
 .sub{font-size:11px;color:#A0A0A0;text-transform:uppercase;letter-spacing:2px;margin-bottom:36px}
 .label{font-size:12px;color:#707070;font-weight:500;text-align:left;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
-.pin-input{width:100%;padding:14px 16px;font-size:22px;letter-spacing:8px;border:2px solid #E8E8E8;border-radius:10px;text-align:center;font-family:'Outfit',sans-serif;font-weight:600;color:#1A1A1A;outline:none;transition:border-color .2s}
+.pin-input{width:100%;padding:14px 12px;font-size:20px;letter-spacing:5px;border:2px solid #E8E8E8;border-radius:10px;text-align:center;font-family:'Outfit',sans-serif;font-weight:600;color:#1A1A1A;outline:none;transition:border-color .2s}
 .pin-input:focus{border-color:#C0392B}
 .btn{width:100%;padding:14px;background:#C0392B;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:20px;transition:background .2s;letter-spacing:1px;text-transform:uppercase}
 .btn:hover{background:#922B21}
@@ -26,61 +31,83 @@ body{background:#F7F7F7;font-family:'Outfit',sans-serif;min-height:100vh;display
   <div class="logo">GRUPO <span>MILLA</span></div>
   <div class="sub">Dashboard Comercial</div>
   <div class="label">Ingresá tu PIN</div>
-  <input class="pin-input" type="password" id="pin" maxlength="6" placeholder="······" autocomplete="off" inputmode="numeric">
+  <input class="pin-input" type="password" id="pin" maxlength="8" placeholder="········" autocomplete="off" inputmode="numeric">
   <button class="btn" onclick="ingresar()">Ingresar</button>
   <div class="error" id="err"></div>
   <div class="hint">Contactá a administración si no tenés tu PIN</div>
 </div>
 
 <script>
-const PINES = {
-  "100000": { archivo: "dashboard_gerencia.html",                                    nombre: "MAESTRO — Acceso Completo" },
-  "202945": { archivo: "por_sucursal/dashboard_MILLA_MDP_CHAMPAGNAT.html",           nombre: "Milla MDQ Champagnat" },
-  "203056": { archivo: "por_sucursal/dashboard_MILLA_MDP_INDEPENDENCIA.html",        nombre: "Milla MDQ Independencia" },
-  "204167": { archivo: "por_sucursal/dashboard_MILLA_NEUCAR_CASA_CENTRAL.html",      nombre: "Milla Neucar Carhué" },
-  "205278": { archivo: "por_sucursal/dashboard_MILLA_NEUCAR_CARHUE_LOCAL.html",      nombre: "Milla Neucar Carhué Local" },
-  "207490": { archivo: "por_sucursal/dashboard_MILLA_NEUCAR_PEHUAJO.html",           nombre: "Milla Neucar Pehuajó" },
-  "208501": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_AELO.html",             nombre: "Milla NQN Añelo" },
-  "209612": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_BARILOCHE.html",        nombre: "Milla NQN Bariloche" },
-  "210723": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_CIPOLLETTI.html",       nombre: "Milla NQN Cipolletti" },
-  "211834": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_CUTRAL_CO.html",        nombre: "Milla NQN Cutral Có" },
-  "212945": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_NEUQUEN.html",          nombre: "Milla NQN Neuquén" },
-  "213056": { archivo: "por_sucursal/dashboard_MILLA_NEUQUEN_ROCA.html",             nombre: "Milla NQN Roca" },
-  "214167": { archivo: "por_sucursal/dashboard_MILLA_SUR_BAHIA_BLANCA.html",         nombre: "Milla Sur Bahía Blanca" },
-  "216389": { archivo: "por_sucursal/dashboard_MILLA_SUR_RIO_GALLEGOS.html",         nombre: "Milla Sur Río Gallegos" },
-  "217490": { archivo: "por_sucursal/dashboard_MILLA_SUR_SANTA_ROSA.html",           nombre: "Milla Sur Santa Rosa" },
-  "218501": { archivo: "por_sucursal/dashboard_MILLA_SUR_TRES_ARROYOS.html",         nombre: "Milla Sur Tres Arroyos" },
-  "219612": { archivo: "por_sucursal/dashboard_GOMERIAS_MONZA_TRUCK.html",           nombre: "Gomerías Monza Truck" },
-  "220723": { archivo: "por_sucursal/dashboard_MONZA_NEUMATICOS_BAHIA_BLANCA.html",  nombre: "Monza Neumáticos BB" },
-  "221834": { archivo: "por_sucursal/dashboard_MONZA_NEUMATICOS_BTS_BAHIA_BLANCA.html", nombre: "Monza Neumáticos BTS" },
-  "224167": { archivo: "por_sucursal/dashboard_RECMIL_CARHUE.html",                  nombre: "Recmil Carhué" },
-  "225278": { archivo: "por_sucursal/dashboard_RECMIL_OLAVARRIA.html",               nombre: "Recmil Olavarría" },
-  "226389": { archivo: "por_sucursal/dashboard_RECMIL_REALICO.html",                 nombre: "Recmil Realicó" },
-  "227490": { archivo: "por_sucursal/dashboard_SUR_NEUMATICOS_PUERTO_MADRYN.html",   nombre: "Milla Sur Puerto Madryn" },
-  "228501": { archivo: "por_sucursal/dashboard_SUR_NEUMATICOS_TRELEW.html",          nombre: "Milla Sur Trelew" },
-  "229612": { archivo: "dashboard_recmil.html",                                       nombre: "Recmil Mar del Plata" },
-  "230723": { archivo: "dashboard_recmil.html",                                       nombre: "Recmil Cipolletti" },
-  "231500": { archivo: "dashboard_recmil.html",                                       nombre: "Recmil — Todas las sucursales" },
-  "300000": { archivo: "reporte_vendedores.html",                                      nombre: "Reporte de Vendedores" },
-};
+// Los PINs NO viajan en este archivo. Solo van los hashes: para entrar hay que
+// saber el PIN, y probar los 100 millones de combinaciones posibles es inviable
+// porque cada intento cuesta 250.000 vueltas de PBKDF2.
+// Esta tabla la escribe generar_dashboard_v3.py — no editar a mano.
+const DESTINOS = {"d5ed1a45671dc743c2c69a36572841c8b2c59fdcd37b7938eb6537501185c3b4": {"archivo": "dashboard_gerencia.html", "nombre": "MAESTRO — Equipo"}, "05bbef3ce1ed13f3e7b896e6178b3a0bd66c70a197dc3f40ca448a94b47ce92d": {"archivo": "dashboard_gerencia.html", "nombre": "Lautaro"}, "ac1642d409721d0dc0f483f647b60ea26848f22ff222d3d6d8837ab666caf5ec": {"archivo": "dashboard_gerencia.html", "nombre": "Natali"}, "54d8b6c69d6df23073d658812382157a4fa0cb4609fd36a7eda8d99b52766143": {"archivo": "dashboard_gerencia.html", "nombre": "Sebastián"}, "90e1a5f35f9c72357441be9030214a2fa579ba5e60103f892f9b4bccdfd0f2c8": {"archivo": "por_sucursal/dashboard_MILLA_MDP_CHAMPAGNAT.html", "nombre": "Milla MDQ Champagnat"}, "e99083132a2a1cf00aeea5b2d7dd128bb1fae12e1d53aa68206d35d551614405": {"archivo": "por_sucursal/dashboard_MILLA_MDP_INDEPENDENCIA.html", "nombre": "Milla MDQ Independencia"}, "d9f209563d65da199dbb563c5b11652a0aa351443db5fce190c54118362e5b14": {"archivo": "por_sucursal/dashboard_MILLA_NEUCAR_CASA_CENTRAL.html", "nombre": "Milla Neucar Casa Central"}, "060ef43f9ba5a992ef7257681139bc9fa01233eb06953fdf68d094e0c3ee367a": {"archivo": "por_sucursal/dashboard_MILLA_NEUCAR_CARHUE_LOCAL.html", "nombre": "Milla Neucar Carhué Local"}, "e9e8a4d601c8352cf3e292b172b852a3e8372b26f77f94df8d583d2f1f63da09": {"archivo": "por_sucursal/dashboard_MILLA_NEUCAR_PEHUAJO.html", "nombre": "Milla Neucar Pehuajó"}, "8dbd7a18920e98ecb5c423f1f60460969fcacdf20504c079ed996f0346aac07b": {"archivo": "por_sucursal/dashboard_MILLA_NEUQUEN_AELO.html", "nombre": "Milla NQN Añelo"}, "4ef1eba995aa46141bf674a608afcdb9607453276b7607ad7a0ac23078a39e2c": {"archivo": "por_sucursal/dashboard_MILLA_NEUQUEN_BARILOCHE.html", "nombre": "Milla NQN Bariloche"}, "09cf3c5afe3515ce1d3163bf8f8dd173dc072ac67612437f6cadbf9ea37792ab": {"archivo": "por_sucursal/dashboard_MILLA_NEUQUEN_CIPOLLETTI.html", "nombre": "Milla NQN Cipolletti"}, "d1561a717cd5b0ff7738469c1356e712a859aa263693900f1d47c6af5e580327": {"archivo": "por_sucursal/dashboard_MILLA_NEUQUEN_CUTRAL_CO.html", "nombre": "Milla NQN Cutral Có"}, "7b59dea27e4c983b89f6d663b939e0d6c2e6a3c30cf71b2d78adeb02563814b9": {"archivo": "por_sucursal/dashboard_MILLA_NEUQUEN_NEUQUEN.html", "nombre": "Milla NQN Neuquén"}, "15fc89e5e10c6d52e3ae9523120dcfa98286c57085037d8c0725369cf4424c7f": {"archivo": "por_sucursal/dashboard_MILLA_NEUQUEN_ROCA.html", "nombre": "Milla NQN Roca"}, "8e0dfff74e802f6b86f4984359986b117c29e90a1a11b77bfc7290aa260887ed": {"archivo": "por_sucursal/dashboard_MILLA_SUR_BAHIA_BLANCA.html", "nombre": "Milla Sur Bahía Blanca"}, "481d5cfe341b82708f9ae8bfc8d7a3ca62ef785c344bdb6596596252403ccf46": {"archivo": "por_sucursal/dashboard_MILLA_SUR_RIO_GALLEGOS.html", "nombre": "Milla Sur Río Gallegos"}, "004e4a9034867e587f49b512bc5cdc004029854634fd00f3a9cd62e80877e19a": {"archivo": "por_sucursal/dashboard_MILLA_SUR_SANTA_ROSA.html", "nombre": "Milla Sur Santa Rosa"}, "16c0bd1c82f9e8da045ebc54db2a5f7a4caf584951295c5ddee93d0cb1c8ac9a": {"archivo": "por_sucursal/dashboard_MILLA_SUR_TRES_ARROYOS.html", "nombre": "Milla Sur Tres Arroyos"}, "4a2a8c635a17b5b3a927465f454c46b9662db3aa7aa416f7f73534bf84487a3e": {"archivo": "por_sucursal/dashboard_GOMERIAS_MONZA_TRUCK.html", "nombre": "Gomerías Monza Truck"}, "1e0ef1900c52f76f5630d28fe8c79d2f9e1f7f5f2d7b1ddfad057888077d6aa0": {"archivo": "por_sucursal/dashboard_MONZA_NEUMATICOS_BAHIA_BLANCA.html", "nombre": "Monza Neumáticos BB"}, "6f301935dd71aa86abfca9891b7e2477c254eb9c735555d2f6c33f02b5c932b4": {"archivo": "por_sucursal/dashboard_MONZA_NEUMATICOS_BTS_BAHIA_BLANCA.html", "nombre": "Monza Neumáticos BTS"}, "147647ef5a8894c0372b1f670c1ee029d8e81329335471ccbc7b17ab8104e309": {"archivo": "por_sucursal/dashboard_RECMIL_CARHUE.html", "nombre": "Recmil Carhué"}, "5c37c0cb0b67bb209c0fad1a03b67b048272827a2ad0c6d5f2368a9e5ce0d79f": {"archivo": "por_sucursal/dashboard_RECMIL_OLAVARRIA.html", "nombre": "Recmil Olavarría"}, "c25c408b25752682addb21bc45ef7cd6faef402e115c7187ca1642188d991e0e": {"archivo": "por_sucursal/dashboard_RECMIL_REALICO.html", "nombre": "Recmil Realicó"}, "a8416b8ccd5962f09e0d07f0a271e9dbf5a67db4fa36caec89568a9c2762bac7": {"archivo": "por_sucursal/dashboard_RECMIL_CIPOLLETTI.html", "nombre": "Recmil Cipolletti"}, "0644cdcbf166bcf252917b3856bcec590322344163d5b7773b48a0c7c5fecd5e": {"archivo": "por_sucursal/dashboard_RECMIL_MAR_DEL_PLATA.html", "nombre": "Recmil Mar del Plata"}, "da46604f14dc28993ef8d799b4bd5999e4675dc74cfd18b8814a3665ab44fb77": {"archivo": "por_sucursal/dashboard_SUR_NEUMATICOS_PUERTO_MADRYN.html", "nombre": "Milla Sur Puerto Madryn"}, "e2a8f3da9880111e023160945d6f8f63d2fa9e1aa6d89e7bf5163956920924e6": {"archivo": "por_sucursal/dashboard_SUR_NEUMATICOS_TRELEW.html", "nombre": "Milla Sur Trelew"}};
+const PIN_SALT = "GrupoMilla-dashboard-2026";
+const PIN_ITER = 250000;
+
+// Mismo cálculo que hace el .py, para que los hashes coincidan
+async function hashPin(pin){
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name:'PBKDF2', salt: enc.encode(PIN_SALT), iterations: PIN_ITER, hash:'SHA-256' }, key, 256);
+  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 
 const input = document.getElementById('pin');
 const err   = document.getElementById('err');
 
+// Si un tablero rebotó la sesión por falta de permiso, se explica el motivo
+if (new URLSearchParams(location.search).get('e') === 'permiso') {
+  err.style.color = '#C0392B';
+  err.textContent = 'Tu PIN no tiene acceso a ese tablero.';
+}
+
 input.addEventListener('keydown', e => { if(e.key === 'Enter') ingresar(); });
+// Solo dígitos: si se pega un PIN con espacios o guiones, se limpia solo.
+// Importante no usar parseInt: hay PINs que empiezan con cero.
+input.addEventListener('input', () => {
+  const limpio = input.value.replace(/\D/g,'');
+  if(limpio !== input.value) input.value = limpio;
+});
 input.focus();
 
-function ingresar() {
+let verificando = false;
+
+async function ingresar() {
+  if (verificando) return;                  // el hash tarda un instante: evita doble envío
   const pin = input.value.trim();
-  const acceso = PINES[pin];
+  if (!pin) { err.textContent = 'Ingresá tu PIN.'; input.focus(); return; }
+
+  verificando = true;
+  err.style.color = '#A0A0A0';
+  err.textContent = 'Verificando…';
+
+  let hash;
+  try {
+    hash = await hashPin(pin);
+  } catch (e) {
+    // crypto.subtle solo existe en HTTPS (o localhost)
+    err.style.color = '#C0392B';
+    err.textContent = 'Este navegador no puede validar el PIN. Abrí el sitio con https://';
+    verificando = false;
+    return;
+  }
+
+  const acceso = DESTINOS[hash];
+  verificando = false;
   if (!acceso) {
+    err.style.color = '#C0392B';
     err.textContent = 'PIN incorrecto. Intentá de nuevo.';
     input.value = '';
     input.focus();
     return;
   }
   err.textContent = '';
-  sessionStorage.setItem('gm_auth', pin);
+  // Se guarda el HASH, no el PIN: cada tablero compara contra su lista permitida
+  sessionStorage.setItem('gm_auth', hash);
+  sessionStorage.setItem('gm_nombre', acceso.nombre);
   // Se agrega la fecha de hoy a la URL para que el navegador no sirva una versión vieja del caché
   const v = new Date().toISOString().slice(0,10).replace(/-/g,'');
   window.location.href = acceso.archivo + '?v=' + v;
