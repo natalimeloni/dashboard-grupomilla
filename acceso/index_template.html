@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<!-- Sin esto el navegador sirve la pantalla de acceso vieja y siguen andando
+     los PINs anteriores aunque ya se hayan cambiado -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Grupo Milla — Acceso Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#F7F7F7;font-family:'Outfit',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#fff;border-radius:16px;padding:48px 40px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,.12);text-align:center}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;color:#1A1A1A;margin-bottom:4px}
+.logo span{color:#C0392B}
+.sub{font-size:11px;color:#A0A0A0;text-transform:uppercase;letter-spacing:2px;margin-bottom:36px}
+.label{font-size:12px;color:#707070;font-weight:500;text-align:left;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.pin-input{width:100%;padding:14px 12px;font-size:20px;letter-spacing:5px;border:2px solid #E8E8E8;border-radius:10px;text-align:center;font-family:'Outfit',sans-serif;font-weight:600;color:#1A1A1A;outline:none;transition:border-color .2s}
+.pin-input:focus{border-color:#C0392B}
+.btn{width:100%;padding:14px;background:#C0392B;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;margin-top:20px;transition:background .2s;letter-spacing:1px;text-transform:uppercase}
+.btn:hover{background:#922B21}
+.error{color:#C0392B;font-size:13px;margin-top:12px;min-height:20px;font-weight:500}
+.hint{font-size:11px;color:#C0C0C0;margin-top:24px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">GRUPO <span>MILLA</span></div>
+  <div class="sub">Dashboard Comercial</div>
+  <div class="label">Ingresá tu PIN</div>
+  <input class="pin-input" type="password" id="pin" maxlength="8" placeholder="········" autocomplete="off" inputmode="numeric">
+  <button class="btn" onclick="ingresar()">Ingresar</button>
+  <div class="error" id="err"></div>
+  <div class="hint">Contactá a administración si no tenés tu PIN</div>
+</div>
+
+<script>
+// Los PINs NO viajan en este archivo. Solo van los hashes: para entrar hay que
+// saber el PIN, y probar los 100 millones de combinaciones posibles es inviable
+// porque cada intento cuesta 250.000 vueltas de PBKDF2.
+// Esta tabla la escribe generar_dashboard_v3.py — no editar a mano.
+const DESTINOS = __PIN_DESTINOS__;
+const PIN_SALT = "__PIN_SALT__";
+const PIN_ITER = __PIN_ITER__;
+
+// Mismo cálculo que hace el .py, para que los hashes coincidan
+async function hashPin(pin){
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(pin), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name:'PBKDF2', salt: enc.encode(PIN_SALT), iterations: PIN_ITER, hash:'SHA-256' }, key, 256);
+  return [...new Uint8Array(bits)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+const input = document.getElementById('pin');
+const err   = document.getElementById('err');
+
+// Si un tablero rebotó la sesión por falta de permiso, se explica el motivo
+if (new URLSearchParams(location.search).get('e') === 'permiso') {
+  err.style.color = '#C0392B';
+  err.textContent = 'Tu PIN no tiene acceso a ese tablero.';
+}
+
+input.addEventListener('keydown', e => { if(e.key === 'Enter') ingresar(); });
+// Solo dígitos: si se pega un PIN con espacios o guiones, se limpia solo.
+// Importante no usar parseInt: hay PINs que empiezan con cero.
+input.addEventListener('input', () => {
+  const limpio = input.value.replace(/\D/g,'');
+  if(limpio !== input.value) input.value = limpio;
+});
+input.focus();
+
+let verificando = false;
+
+async function ingresar() {
+  if (verificando) return;                  // el hash tarda un instante: evita doble envío
+  const pin = input.value.trim();
+  if (!pin) { err.textContent = 'Ingresá tu PIN.'; input.focus(); return; }
+
+  verificando = true;
+  err.style.color = '#A0A0A0';
+  err.textContent = 'Verificando…';
+
+  let hash;
+  try {
+    hash = await hashPin(pin);
+  } catch (e) {
+    // crypto.subtle solo existe en HTTPS (o localhost)
+    err.style.color = '#C0392B';
+    err.textContent = 'Este navegador no puede validar el PIN. Abrí el sitio con https://';
+    verificando = false;
+    return;
+  }
+
+  const acceso = DESTINOS[hash];
+  verificando = false;
+  if (!acceso) {
+    err.style.color = '#C0392B';
+    err.textContent = 'PIN incorrecto. Intentá de nuevo.';
+    input.value = '';
+    input.focus();
+    return;
+  }
+  err.textContent = '';
+  // Se guarda el HASH, no el PIN: cada tablero compara contra su lista permitida
+  sessionStorage.setItem('gm_auth', hash);
+  sessionStorage.setItem('gm_nombre', acceso.nombre);
+  // Se agrega la fecha de hoy a la URL para que el navegador no sirva una versión vieja del caché
+  const v = new Date().toISOString().slice(0,10).replace(/-/g,'');
+  window.location.href = acceso.archivo + '?v=' + v;
+}
+</script>
+</body>
+</html>
