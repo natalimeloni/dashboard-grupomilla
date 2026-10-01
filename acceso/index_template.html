@@ -73,6 +73,29 @@ input.addEventListener('input', () => {
 });
 input.focus();
 
+// ══ REGISTRO DE INGRESOS ══════════════════════════════════════════════════
+// Anota en una planilla de Google quién entra y cuándo. El PIN NUNCA se manda:
+// solo el nombre del acceso, que es el que figura en la tabla de PINES.
+//
+// Para activarlo hay que pegar acá la URL de la aplicación web que devuelve
+// Google. Las instrucciones están en acceso/registro_ingresos.gs.
+// Vacío = no se registra nada y el login funciona igual.
+var URL_REGISTRO = 'https://script.google.com/macros/s/AKfycbzacvlCxDySllKvvd-0HhmD9hFWkyN9TipUxDDodGh8KEmaMzIbC_pBOezImR8RB5HT/exec';
+
+function registrarIngreso(nombreAcceso, archivo) {
+  if (!URL_REGISTRO) return;
+  try {
+    var q = 'acceso='  + encodeURIComponent(nombreAcceso)
+          + '&tablero=' + encodeURIComponent(archivo || '')
+          + '&disp='    + (/Mobi|Android|iPhone/i.test(navigator.userAgent) ? 'celular' : 'compu');
+    // 'no-cors' + keepalive: no espera respuesta y sobrevive a que la página
+    // cambie enseguida. Si el registro falla, nadie se entera y se entra igual:
+    // esto no puede ser nunca un motivo para no poder abrir el tablero.
+    fetch(URL_REGISTRO + '?' + q, { method: 'GET', mode: 'no-cors', keepalive: true })
+      .catch(function () {});
+  } catch (e) { /* el registro jamás frena el ingreso */ }
+}
+
 let verificando = false;
 
 async function ingresar() {
@@ -108,6 +131,7 @@ async function ingresar() {
   // Se guarda el HASH, no el PIN: cada tablero compara contra su lista permitida
   sessionStorage.setItem('gm_auth', hash);
   sessionStorage.setItem('gm_nombre', acceso.nombre);
+  registrarIngreso(acceso.nombre, acceso.archivo);
   // Se agrega la fecha de hoy a la URL para que el navegador no sirva una versión vieja del caché
   const v = new Date().toISOString().slice(0,10).replace(/-/g,'');
   window.location.href = acceso.archivo + '?v=' + v;
